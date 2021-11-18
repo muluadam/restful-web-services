@@ -1,13 +1,18 @@
 package com.muluadam.restfulwebservices.user;
 
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
 import java.util.Date;
 
 public class User {
     private int id;
+@Size(min = 4)
     private  String name;
+@Past
     private Date birthDate;
 
     public User() {
+
     }
 
     public User(int id, String name, Date birthDate) {

@@ -2,10 +2,15 @@ package com.muluadam.restfulwebservices.user;
 
 import com.muluadam.restfulwebservices.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.EntityModel;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
+
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -21,15 +26,23 @@ public class UserController {
         }
 
     @GetMapping("/user/{id}")
-    public User getOne(@PathVariable int id){
+    public EntityModel<User> getOne(@PathVariable int id){
 User user= userDaoService.findOne(id);
     if (user==null){
         throw new UserNotFoundException("User Not Found Exception ");
     }
-    return user;
+    EntityModel<User> model= EntityModel.of(user);
+        /**
+         *  static import helps  as to import all the methods of  any class
+         */
+        // internationalization == i18n
+        WebMvcLinkBuilder linkToUsers=
+                linkTo(methodOn(this.getClass()).getAll());
+        model.add(linkToUsers.withRel("all-users"));
+    return model;
     }
     @PostMapping("/user")
-    public ResponseEntity<Object> addUser(@RequestBody User user){
+    public ResponseEntity<Object> addUser(@Valid @RequestBody User user){
        // System.out.println(user);
 User savedUser=userDaoService.save(user);
        URI location= ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(savedUser.getId()).toUri();
